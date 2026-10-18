@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes.js';
+import cronRoutes from './routes/cron.routes.js';
 import { requireAuth } from './middleware/auth.middleware.js';
 import menuRoutes from './routes/menu.routes.js';
 import ordersRoutes from './routes/orders.routes.js';
@@ -14,17 +15,17 @@ import paymentsRoutes from './routes/payments.routes.js';
 import settingsRoutes from './routes/settings.routes.js';
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
-// Public Routes
+// --- Public Routes ---
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, message: 'TableMint API is running 🚀' });
 });
 app.use('/api/auth', authRoutes);
+app.use('/api/cron', cronRoutes);
 
-// Protected Routes (Token zaroori hai)
+// --- Protected Routes ---
 app.use('/api/menu', requireAuth, menuRoutes);
 app.use('/api/orders', requireAuth, ordersRoutes);
 app.use('/api/tables', requireAuth, tablesRoutes);
