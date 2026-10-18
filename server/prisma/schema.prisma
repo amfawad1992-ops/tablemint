@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Settings {
+  id             String   @id @default("global")
+  restaurantName String   @default("TableMint")
+  tagline        String   @default("Smart Orders. Smooth Service.")
+  address        String?
+  city           String?
+  phone          String?
+  email          String?
+  currency       String   @default("PKR")
+  timezone       String   @default("Asia/Karachi")
+  taxRate        Float    @default(1.0)
+  donationAmount Float    @default(2.0)
+  receiptFooter  String?
+  updatedAt      DateTime @updatedAt
+}
+
+model Category {
+  id    String     @id @default(cuid())
+  name  String     @unique
+}
+
+model MenuItem {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String?
+  price       Float
+  category    String
+  image       String?
+  prepTime    Int         @default(10)
+  available   Boolean     @default(true)
+  featured    Boolean     @default(false)
+  orderItems  OrderItem[]
+}
+
+model Table {
+  id             String  @id @default(cuid())
+  number         String  @unique
+  seats          Int     @default(2)
+  floor          String  @default("Main Floor")
+  status         String  @default("Available")
+  guestCount     Int     @default(0)
+  currentOrderId String?
+  note           String?
+}
+
+model Customer {
+  id            String   @id @default(cuid())
+  name          String
+  phone         String?
+  email         String?
+  notes         String?
+  loyaltyPoints Int      @default(0)
+  createdAt     DateTime @default(now())
+  orders        Order[]
+}
+
+model Order {
+  id            String         @id @default(cuid())
+  orderNumber   String         @unique
+  type          String         @default("Dine In")
+  status        String         @default("New")
+  table         String?
+  people        Int            @default(1)
+  notes         String?
+  discount      Float          @default(0)
+  customerId    String?
+  customer      Customer?      @relation(fields: [customerId], references: [id])
+  items         OrderItem[]
+  createdAt     DateTime       @default(now())
+  statusHistory OrderHistory[]
+}
+
+model OrderItem {
+  id         String    @id @default(cuid())
+  orderId    String
+  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId Int?
+  name       String
+  price      Float
+  qty        Int
+  menuItem   MenuItem? @relation(fields: [menuItemId], references: [id])
+}
+
+model OrderHistory {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    String
+  at        DateTime @default(now())
+}
+
+model Staff {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  role      String   @default("Waiter")
+  shift     String   @default("Morning")
+  active    Boolean  @default(true)
+  joinedAt  DateTime @default(now())
+}
+
+model Ingredient {
+  id             String   @id @default(cuid())
+  name           String
+  sku            String?  @unique
+  category       String
+  unit           String
+  currentStock   Float    @default(0)
+  reorderLevel   Float    @default(0)
+  costPerUnit    Float    @default(0)
+  supplier       String?
+  note           String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  movements      InventoryMovement[]
+}
+
+model InventoryMovement {
+  id           String     @id @default(cuid())
+  ingredientId String
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  type         String
+  qty          Float
+  note         String?
+  user         String?
+  createdAt    DateTime   @default(now())
+}
+
+model Reservation {
+  id         String   @id @default(cuid())
+  name       String
+  phone      String?
+  date       String
+  time       String
+  guests     Int      @default(1)
+  tableId    String?
+  request    String?
+  status     String   @default("Pending")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Payment {
+  id             String   @id @default(cuid())
+  receiptId      String   @unique
+  orderId        String?
+  table          String?
+  amount         Float
+  method         String   @default("Cash")
+  status         String   @default("Paid")
+  refundedAmount Float    @default(0)
+  createdAt      DateTime @default(now())
+}
