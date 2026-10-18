@@ -1,5 +1,4 @@
 const BASE_URL = 'https://tablemint-eta.vercel.app/api';
-// const BASE_URL = 'http://localhost:4000/api'; // Local test ke liye
 
 async function request(path, options = {}) {
   const token = localStorage.getItem('tablemint_token');
@@ -12,7 +11,6 @@ async function request(path, options = {}) {
   const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
 
   if (res.status === 401) {
-    // Token invalid/expired - force logout
     window.dispatchEvent(new Event('tablemint:unauthorized'));
     throw new Error('Session expired. Please login again.');
   }
@@ -30,6 +28,11 @@ export const api = {
     request('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
+    }),
+  updateProfile: (data) =>
+    request('/auth/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
     }),
 
   // Menu

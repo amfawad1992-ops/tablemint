@@ -12,7 +12,6 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (email, password) => {
     const data = await api.login(email, password);
-    // data = { token, user }
     localStorage.setItem('tablemint_token', data.token);
     localStorage.setItem('tablemint_user', JSON.stringify(data.user));
     setToken(data.token);
@@ -27,7 +26,13 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
-  // Auto logout if API returns 401
+  const updateProfile = useCallback(async (data) => {
+    const updatedUser = await api.updateProfile(data);
+    localStorage.setItem('tablemint_user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
+    return updatedUser;
+  }, []);
+
   useEffect(() => {
     const handleUnauthorized = () => logout();
     window.addEventListener('tablemint:unauthorized', handleUnauthorized);
@@ -43,8 +48,9 @@ export function AuthProvider({ children }) {
       isAuthenticated: !!token,
       login,
       logout,
+      updateProfile,
     }),
-    [token, user, login, logout]
+    [token, user, login, logout, updateProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
