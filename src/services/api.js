@@ -1,4 +1,8 @@
-const BASE_URL = 'http://localhost:4000/api';
+// Pehle ye tha:
+// const BASE_URL = 'http://localhost:4000/api';
+
+// Ab ye karo (aapka live backend URL):
+const BASE_URL = 'https://tablemint-eta.vercel.app/api';
 
 async function request(path, options = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {
