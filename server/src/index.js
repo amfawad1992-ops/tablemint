@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import authRoutes from './routes/auth.routes.js';
+import { requireAuth } from './middleware/auth.middleware.js';
 import menuRoutes from './routes/menu.routes.js';
 import ordersRoutes from './routes/orders.routes.js';
 import tablesRoutes from './routes/tables.routes.js';
@@ -16,20 +18,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// --- Routes ---
+// Public Routes
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, message: 'TableMint API is running 🚀' });
 });
+app.use('/api/auth', authRoutes);
 
-app.use('/api/menu', menuRoutes);
-app.use('/api/orders', ordersRoutes);
-app.use('/api/tables', tablesRoutes);
-app.use('/api/customers', customersRoutes);
-app.use('/api/staff', staffRoutes);
-app.use('/api/inventory', inventoryRoutes);
-app.use('/api/reservations', reservationsRoutes);
-app.use('/api/payments', paymentsRoutes);
-app.use('/api/settings', settingsRoutes);
+// Protected Routes (Token zaroori hai)
+app.use('/api/menu', requireAuth, menuRoutes);
+app.use('/api/orders', requireAuth, ordersRoutes);
+app.use('/api/tables', requireAuth, tablesRoutes);
+app.use('/api/customers', requireAuth, customersRoutes);
+app.use('/api/staff', requireAuth, staffRoutes);
+app.use('/api/inventory', requireAuth, inventoryRoutes);
+app.use('/api/reservations', requireAuth, reservationsRoutes);
+app.use('/api/payments', requireAuth, paymentsRoutes);
+app.use('/api/settings', requireAuth, settingsRoutes);
 
 // --- Local development ---
 if (process.env.NODE_ENV !== 'production') {

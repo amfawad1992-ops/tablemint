@@ -1,43 +1,40 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, UtensilsCrossed } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
+  
   const [email, setEmail] = useState('admin@tablemint.local');
   const [password, setPassword] = useState('admin123');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    // Demo Login Logic (Frontend Only for now)
-    setTimeout(() => {
-      if (email === 'admin@tablemint.local' && password === 'admin123') {
-        // Success - Redirect to POS
-        navigate('/pos');
-      } else {
-        setError('Invalid credentials. Please use the demo credentials below.');
-        setIsLoading(false);
-      }
-    }, 800); // Fake network delay for realistic feel
+    try {
+      await login(email, password);
+      navigate('/pos');
+    } catch (err) {
+      setError('Invalid credentials. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Gradient (Same as app) */}
       <div className="absolute inset-0 bg-gradient-to-br from-brand-bg via-[#7ed6d0] to-brand-softBg -z-10" />
-
-      {/* Decorative Circles */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-white/20 rounded-full blur-3xl -z-10" />
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-white/20 rounded-full blur-3xl -z-10" />
 
       <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] overflow-hidden">
-        {/* Header section with brand */}
         <div className="p-8 pb-6 text-center border-b border-brand-border">
           <div className="w-14 h-14 bg-brand-primary text-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-brand-primary/30">
             <UtensilsCrossed className="w-7 h-7" />
@@ -50,7 +47,6 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Form section */}
         <form onSubmit={handleLogin} className="p-8 space-y-5">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 text-xs rounded-lg px-4 py-3">
@@ -126,7 +122,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Demo credentials helper */}
         <div className="bg-brand-content px-8 py-4 border-t border-brand-border text-center">
           <p className="text-[11px] text-brand-mutedText mb-1">Demo Credentials:</p>
           <p className="text-xs font-medium text-brand-darkText">

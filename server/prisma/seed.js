@@ -2,6 +2,7 @@ import 'dotenv/config';
 import pkg from '@prisma/client';
 const { PrismaClient } = pkg;
 import { PrismaPg } from '@prisma/adapter-pg';
+import bcrypt from 'bcryptjs';
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
@@ -26,19 +27,31 @@ async function main() {
   await prisma.inventoryMovement.deleteMany();
   await prisma.reservation.deleteMany();
   await prisma.payment.deleteMany();
+  await prisma.user.deleteMany();
 
-  // 1. Settings
+  // 1. Admin User
+  const passwordHash = await bcrypt.hash('admin123', 10);
+  await prisma.user.create({
+    data: {
+      name: 'Sohan',
+      email: 'admin@tablemint.local',
+      passwordHash,
+      role: 'ADMIN',
+    },
+  });
+
+  // 2. Settings
   await prisma.settings.create({
     data: { id: 'global', restaurantName: 'TableMint', currency: 'PKR' },
   });
 
-  // 2. Categories
+  // 3. Categories
   const cats = ['Special', 'Soups', 'Desserts', 'Chickens'];
   for (const c of cats) {
     await prisma.category.create({ data: { name: c } });
   }
 
-  // 3. Menu Items
+  // 4. Menu Items
   const menu = [
     { name: 'Grilled Salmon Steak', price: 15.0, category: 'Special', prepTime: 15, featured: true, image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=400&h=400&q=80' },
     { name: 'Tofu Poke Bowl', price: 7.0, category: 'Special', prepTime: 10, featured: false, image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&h=400&q=80' },
@@ -51,18 +64,18 @@ async function main() {
     await prisma.menuItem.create({ data: item });
   }
 
-  // 4. Tables
+  // 5. Tables
   const tables = ['01', '02', '03', '04', '05', '06'];
   for (const num of tables) {
     await prisma.table.create({ data: { number: num, seats: 4 } });
   }
 
-  // 5. Customers
+  // 6. Customers
   await prisma.customer.create({
     data: { name: 'Mr. Ahmed Khan', phone: '+92 300 1234567', email: 'ahmed@example.com', loyaltyPoints: 50 },
   });
 
-  // 6. Staff
+  // 7. Staff
   await prisma.staff.create({
     data: { name: 'Sohan', email: 'sohan@tablemint.local', role: 'Owner' },
   });
