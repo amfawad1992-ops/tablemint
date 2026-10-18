@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import OrderLineSection from '../components/pos/OrderLineSection';
 import FoodMenuSection from '../components/pos/FoodMenuSection';
 import BillingPanel from '../components/pos/BillingPanel';
+import ReceiptModal from '../components/orders/ReceiptModal';
 import { useOrders } from '../context/OrdersContext';
 import { useMenu } from '../context/MenuContext';
 import { usePayments } from '../context/PaymentsContext';
@@ -31,6 +32,9 @@ export default function POSPage() {
   const [paymentMethod, setPaymentMethod] = useState('Cash');
   const [toast, setToast] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Naya state receipt modal ke liye
+  const [receiptOrder, setReceiptOrder] = useState(null);
 
   const selectedOrder = orders.find((o) => o.id === selectedOrderId) || orders[0];
 
@@ -114,7 +118,10 @@ export default function POSPage() {
         await clearTable(selectedOrder.table);
       }
 
+      // Yahan hum receipt open kar rahe hain payment ke baad
+      setReceiptOrder(selectedOrder);
       showToast('success', `Payment of $${totals.total} recorded successfully!`);
+
     } catch (err) {
       console.error(err);
       showToast('error', 'Failed to process payment. Check console.');
@@ -171,6 +178,7 @@ export default function POSPage() {
         />
       </div>
 
+      {/* Toast */}
       {toast && (
         <div
           className={`fixed bottom-6 right-6 px-5 py-3 rounded-xl shadow-lg text-sm font-medium text-white animate-toast ${
@@ -180,6 +188,14 @@ export default function POSPage() {
         >
           {toast.message}
         </div>
+      )}
+
+      {/* Auto-open Receipt Modal */}
+      {receiptOrder && (
+        <ReceiptModal 
+          order={receiptOrder} 
+          onClose={() => setReceiptOrder(null)} 
+        />
       )}
     </>
   );
