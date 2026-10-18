@@ -12,9 +12,7 @@ import paymentsRoutes from './routes/payments.routes.js';
 import settingsRoutes from './routes/settings.routes.js';
 
 const app = express();
-const PORT = process.env.PORT || 4000;
 
-// Allow all origins (Required for Mobile testing)
 app.use(cors());
 app.use(express.json());
 
@@ -33,8 +31,12 @@ app.use('/api/reservations', reservationsRoutes);
 app.use('/api/payments', paymentsRoutes);
 app.use('/api/settings', settingsRoutes);
 
-// --- Start Server on 0.0.0.0 (Allow Mobile) ---
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`\n🚀 Server running on http://localhost:${PORT}`);
-  console.log(`   Network: http://<Your-IP>:${PORT}\n`);
-});
+// --- Local development ---
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 4000;
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`\n🚀 Local Server running on http://localhost:${PORT}\n`);
+  });
+}
+
+export default app;

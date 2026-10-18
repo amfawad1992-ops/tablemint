@@ -1,10 +1,18 @@
 import 'dotenv/config';
-import { prisma } from '../src/lib/prisma.js';
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
+import { PrismaPg } from '@prisma/adapter-pg';
+
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+});
+
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('🌱 Seeding database...');
 
-  // Wipe existing data (for re-running seed)
+  // Wipe existing data
   await prisma.orderHistory.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
